@@ -122,8 +122,19 @@ public:
 
     void operarCaixa(Caixa *c) {
 
-        // Quando está no absoluto inicio
+        bool log = false;
+
+        // Quando está no absoluto inicio da Fila com nenhum dcumento pendente
         if (c->tamanhoDaFila() == 1 && c->qtdePendentes == 0) {
+            c->qtdePendentes += c->f.frente->qtde;
+            c->removerPrimeiroDaFila();
+            c->ocupado = true;
+            return;
+        }
+
+        // Quando você ESTÁ ATENDENDO uma pessoa e TEM APENAS UM documento pendente
+        if (c->tamanhoDaFila() >= 1 && c->qtdePendentes == 1) {
+            c->qtdePendentes--;
             c->qtdePendentes += c->f.frente->qtde;
             c->removerPrimeiroDaFila();
             c->ocupado = true;
@@ -145,11 +156,19 @@ public:
         }
 
         // Quando você ESTÁ ATENDENDO uma pessoa e TEM documentos pendentes
-        if (c->tamanhoDaFila() >= 1 && c->qtdePendentes != 0) {
+        if (c->tamanhoDaFila() >= 1 && c->qtdePendentes > 0) {
+            c->ocupado = true;
             c->qtdePendentes--;
             return;
         }
 
+        // Se for seu ultimo documento pendente, e a fila estiver vazia
+        if (c->qtdePendentes-1 == 0 && c->tamanhoDaFila() == 0) {
+            c->qtdePendentes--;
+            c->ocupado = false;
+        }
+    
+        // Caso nenhuma das condições acima seja ativada
         if (c->qtdePendentes > 0) {
             c->qtdePendentes--;
             return;
