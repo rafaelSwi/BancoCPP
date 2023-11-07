@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <cctype>
 #include <string>
@@ -23,12 +24,6 @@ public:
     int qtdePendentes;
     string tipo;
     fila f;
-
-    void inicializar() {
-        ocupado = false;
-        qtdePendentes = 0;
-        tipo = "";
-    }
 
     int tamanhoDaFila () {
         return f.tamanho;
@@ -79,7 +74,6 @@ public:
             f.tamanho--;
             return;
         }
-
         return;
     }
 
@@ -121,8 +115,6 @@ public:
     }
 
     void operarCaixa(Caixa *c) {
-
-        bool log = false;
 
         // Quando está no absoluto inicio da Fila com nenhum dcumento pendente
         if (c->tamanhoDaFila() == 1 && c->qtdePendentes == 0) {
@@ -167,7 +159,7 @@ public:
             c->qtdePendentes--;
             c->ocupado = false;
         }
-    
+
         // Caso nenhuma das condições acima seja ativada
         if (c->qtdePendentes > 0) {
             c->qtdePendentes--;
@@ -181,13 +173,17 @@ public:
     }
 };
 
+int coletarMinutosDoInput(string input) {
+    istringstream stream(input);
+    string firstLine;
+    getline(stream, firstLine);
+    return (stoi(firstLine)+1);
+}
+
 int* traduzirInput(string input, string tipo_referencia) {
 
     istringstream stream(input);
-
-    string firstLine;
-    getline(stream, firstLine);
-    int tamanho = stoi(firstLine);
+    int tamanho = coletarMinutosDoInput(input);
 
     int* array = new int[tamanho]();
 
@@ -217,7 +213,7 @@ int* traduzirInput(string input, string tipo_referencia) {
             qtde = stoi(qtdeEmString);
 
             tipo = linha[3];
-        } else {
+        } else if (numeroLinha != 0) {
             string minutoEmString = "";
             minutoEmString += linha[0];
             min = stoi(minutoEmString);
@@ -237,31 +233,50 @@ int* traduzirInput(string input, string tipo_referencia) {
         i++;
         numeroLinha++;
     }
-
     return array;
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
 
+    if (argc != 2) {
+        cerr << "No Terminal, use: \\.nome_do_arquivo.cpp entrada.txt > saida.txt" << endl;
+        return 1;
+    }
+
+    //const char* arquivoDeEntrada = argv[1];
+    const char* arquivoDeEntrada = "entrada.txt";
+    ifstream entrada(arquivoDeEntrada);
+
+    string entradaEmString = "";
+
+    string linhaDaEntrada;
+    while (getline(entrada, linhaDaEntrada)) {
+        entradaEmString += (linhaDaEntrada + "\n");
+    }
+
+    // Declara as Filas do Caixa
     fila fila_caixa1;
     fila fila_caixa2;
+
+    // Cria instancia da Classe Agencia
     Agencia agencia;
-    agencia.caixa1.inicializar();
-    agencia.caixa2.inicializar();
+
+    // Define as filas de cada caixa
     agencia.caixa1.f = fila_caixa1;
     agencia.caixa2.f = fila_caixa2;
-    agencia.definirTempo(20);
 
-    string texto = "20\n1 J 4\n2 J 5\n3 N 0\n4 F 3\n5 J 6\n6 J 2\n7 J 4\n8 F 5\n9 N 0\n10 N 0\n11 F 3\n12 J 1\n13 N 0\n14 N 0\n15 N 0\n16 N 0\n17 F 1\n18 N 0\n19 J 2\n20 J 3";
+    // Define o tempo maximo para observar a Agencia (em minutos)
+    agencia.definirTempo(coletarMinutosDoInput(entradaEmString));
 
-
+    // Cria os Arrays que serão armazenados os QTDE no Index que representa MIN
+    // Uso Prático: array[MIN] = [QTDE]
     int* timingCaixa1 = new int [agencia.tempoTotal]();
-    timingCaixa1 = traduzirInput(texto, "F");
-
+    timingCaixa1 = traduzirInput(entradaEmString, "F");
     int* timingCaixa2 = new int [agencia.tempoTotal]();
-    timingCaixa2 = traduzirInput(texto, "J");
+    timingCaixa2 = traduzirInput(entradaEmString, "J");
 
+    // Inicializa as variáveis das Filas
     agencia.caixa1.f.frente = NULL;
     agencia.caixa1.f.re = NULL;
     agencia.caixa1.f.tamanho = 0;
@@ -269,19 +284,21 @@ int main() {
     agencia.caixa2.f.re = NULL;
     agencia.caixa2.f.tamanho = 0;
 
-    agencia.caixa1.qtdePendentes = 0;
+    // Inicia o Loop que finaliza no Tempo Total (minutos)
+    for (int i=0; i<(agencia.tempoTotal-1); i++) {
 
-    for (int i=0; i<agencia.tempoTotal; i++) {
-
+        // Verifica os QTDE daquele minuto especifico pelo array
         agencia.caixa1.adicionarNaFila(timingCaixa1[i]);
         agencia.caixa2.adicionarNaFila(timingCaixa2[i]);
 
+        // Realiza as ações de operar o caixa
         agencia.operarCaixa(&agencia.caixa1);
         agencia.operarCaixa(&agencia.caixa2);
+
+        // Passa 1 minuto na agência (afetando todos os caixas)
         agencia.passarMinuto();
+
+        // Gera uma Linha com base na situação atual
         agencia.gerarLinha(&agencia.caixa1, &agencia.caixa2);
     }
-    
 }
-
-
