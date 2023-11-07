@@ -1,16 +1,7 @@
 #include <iostream>
-#include <algorithm>
-#include <cctype>
-#include <chrono>
 #include <thread>
+#include <cctype>
 using namespace std;
-
-class Evento {
-public:
-    string tipo;
-    int min;
-    int qtde;
-};
 
 void limparTela(int howMuch) {
     for (int i=0; i < howMuch; i++) {
@@ -20,7 +11,7 @@ void limparTela(int howMuch) {
 
 struct nodo {
     nodo *elo;
-    string info;
+    int qtde;
 };
 
 struct fila {
@@ -29,208 +20,204 @@ struct fila {
     int tamanho;
 };
 
-void inicializar(fila *f) {
-    f->frente = NULL;
-    f->re = NULL;
-    f->tamanho = 0;
-}
+class Caixa {
+public:
+    bool ocupado;
+    int qtdePendentes;
+    string tipo;
+    fila f;
 
-void exibirTodos (fila *f) {
-    
-    cout << "[*] COMANDO: EXIBIR A FILA\n" << endl;
-    
-    if (f->tamanho == 0) {
-        cout << "[!] A fila esta vazia.\n" << endl;
-        return;
+    void inicializar() {
+        ocupado = false;
+        qtdePendentes = 0;
+        tipo = "";
     }
-    
-    nodo *index;
-    index = f->frente;
-    for (int i=0; i < f->tamanho; i++) {
-        cout << (i+1) << ". " << index->info << "\n" << endl;
-        if (index->elo == NULL) {
+
+    int tamanhoDaFila () {
+        return f.tamanho;
+    }
+
+    void adicionarNaFila(int qtde) {
+
+        if (qtde == 0) {
             return;
+        }
+
+        nodo *novo;
+        novo = new (nothrow) nodo;
+        novo->qtde = qtde;
+        novo->elo = NULL;
+
+        if (f.frente == NULL) {
+            if (!ocupado) {
+                qtdePendentes += qtde;
+                ocupado = true;
+                return;
+            } else {
+                f.frente = novo;
+                f.re = novo;
+                f.tamanho++;
+                qtdePendentes += qtde;
+                ocupado = true;
+                return;
+            }
         } else {
-            index = index->elo;
+            if (f.re != NULL) {
+                f.re->elo = novo;
+            }
+            f.re = novo;
+            f.tamanho++;
+            qtdePendentes += qtde;
+            ocupado = true;
+            return;
         }
     }
-    
-    cout << "[*] FIM DA FILA.\n" << endl;
-    return;
-    
-}
 
-void adicionar(fila *f, string info) {
-    
-    nodo *novo;
-    novo = new (nothrow) nodo;
-    novo->info = info;
-    novo->elo = NULL;
-    
-    if (f->frente == NULL) {
-        cout << "[+] '" << info << "' entrou na fila vazia.\n" << endl;
-        f->frente = novo;
-        f->re = novo;
-        f->tamanho++;
-        return;
-    } else {
-        cout << "[+] '" << info << "' entrou na fila.\n" << endl;
-        if (f->re != NULL) {
-            f->re->elo = novo;
+    void removerPrimeiroDaFila() {
+
+        if (f.frente == NULL || f.tamanho <= 0) {
+            return;
         }
-        f->re = novo;
-        f->tamanho++;
-        return;
-    }
-    
-}
 
-void removerPrimeiro(fila *f) {
-    
-    if (f->frente == NULL || f->tamanho <= 0) {
-        cout << "[!] A fila esta vazia, nada tem como remover ninguem.\n" << endl;
+        if (f.frente->elo != NULL) {
+            f.frente = f.frente->elo;
+            ocupado = false;
+            f.tamanho--;
+            return;
+        }
+
+        if (f.frente != NULL) {
+            f.frente = NULL;
+            ocupado = false;
+            f.tamanho--;
+            return;
+        }
+
         return;
     }
-    
-    if (f->frente->elo != NULL) {
-        f->frente = f->frente->elo;
-        cout << "[!] O Primeiro da fila foi removido.\n" << endl;
-        return;
-    }
-    
-    cout << "[!] Ninguem saiu da fila.\n" << endl;
-    return;
-}
 
-void criarEventos() {
-    
-    int minutos;
-    
-    Evento eventos[100] = {};
-    
-    for (int i=0; i < 100; i++) {
-        eventos[i].min = 0;
-        eventos[i].qtde = 0;
-        eventos[i].tipo = "";
-    }
-    
-    cout << "[>] Insira a quantidade de minutos:" << endl;
-    cin >> minutos;
-    
-    limparTela(150);
-    
-    while (true) {
-        
-        Evento evento;
-        evento.min = 1;
-        evento.qtde = 0;
-        evento.tipo = "";
-        
-        for (int i = 0; i < 100; i++) {
-            if (eventos[i].tipo == "") {
-                evento.min = i;
-                break;
-            }
-        }
-        
-        cout << "[*] Minuto de ocorrencia do evento: " << (evento.min+1) << "\n\n" << endl;
-        
-        cout << "[>] Insira o Tipo do Evento ( (F)isico , (J)urifica, (N)inguem ):" << endl;
-        cin >> evento.tipo;
-        string tp = evento.tipo;
-        
-        if (tp[0] != 'F' && tp[0] != 'J' && tp[0] != 'N') {
-            cout << "[!] Input '" << tp << "' invalido. Atribuindo (N)inguem." << endl;
-            evento.tipo = "N";
-        }
-        
-        if (evento.tipo != "N") {
-            cout << "[>] Insira a quantidade de documentos (1...10)." << endl;
-            cin >> evento.qtde;
-            
-            if (evento.qtde < 1 || evento.qtde > 10) {
-                cout << "[!] Valor '" << evento.min << "' invalido. Atribuindo '1'.\n" << endl;
-                evento.qtde = 1;
-            }
-            
-        }
-        
-        this_thread::sleep_for(chrono::seconds(2));
-        limparTela(150);
-        
-        cout << "\n[*] Minuto de Ocorrencia: " << (evento.min+1) << endl;
-        cout << "\n[*] Tipo: " << evento.tipo << endl;
-        cout << "\n[*] Quantidade de Documentos: " << evento.qtde << "\n\n" << endl;
-        
-        cout << "[!] Digite '0' para salvar este evento e continuar inserindo.\n" << endl;
-        cout << "[!] Digite '1' para salvar este evento e parar de inserir.\n" << endl;
-        cout << "[!] Digite '2' para re-fazer este evento.\n" << endl;
-        int opcao = 0;
-        cin >> opcao;
-        
-        limparTela(150);
-        
-        if (opcao == 0) {
-            for (int i = 0; i < 100; i++) {
-                if (eventos[i].tipo == "") {
-                    eventos[i].min = evento.min;
-                    eventos[i].qtde = evento.qtde;
-                    eventos[i].tipo = evento.tipo;
-                    i = 1000;
-                }
-            }
-            limparTela(150);
-            continue;
-        }
-        
-        if (opcao == 1) {
-            for (int i = 0; i < 100; i++) {
-                if (eventos[i].tipo == "") {
-                    eventos[i].min = evento.min;
-                    eventos[i].qtde = evento.qtde;
-                    eventos[i].tipo = evento.tipo;
-                    i = 1000;
-                }
-            }
-            limparTela(150);
-            break;
-        }
-        
-        if (opcao == 2) {
-            continue;
-        }
-        
-        continue;
-        
-    }
-    
-}
+    int totalDeDocumentos () {
 
-void gerarSaida() {
-    
-    
-    
-}
+        if (f.tamanho <= 0) {
+            return 0;
+        }
+        int documentos = 0;
+        nodo *index;
+        index = f.frente;
+        for (int i = 0; i < f.tamanho; i++) {
+            documentos += index->qtde;
+            if (index->elo == NULL) {
+                 return documentos;
+            } else {
+                index = index->elo;
+            }
+        }
+        return 0;
+    }
+
+};
+
+class Agencia {
+public:
+    Caixa caixa1;
+    Caixa caixa2;
+    int tempoRestante;
+    int tempoTotal;
+
+    void gerarLinha(Caixa *c1, Caixa *c2) {
+        string output_c1 = (c1->ocupado ? " A " : " L ") + to_string(c1->tamanhoDaFila());
+        string output_c2 = (c2->ocupado ? " A " : " L ") + to_string(c2->tamanhoDaFila());
+        cout << (tempoTotal-tempoRestante) << output_c1 << output_c2 << "\n";
+        //cout << "MINUTO: " << ((tempoTotal-tempoRestante)+1) << " STATUS:"<< (c->ocupado ? " A " : " L ") << " NA FILA: "<<c->tamanhoDaFila() << " QTDE: " << c->qtdePendentes << endl;
+    }
+
+    void passarMinuto() {
+        tempoRestante--;
+    }
+
+    void operarCaixa(Caixa *c) {
+
+        // Quando está no absoluto inicio
+        if (c->tamanhoDaFila() == 1 && c->qtdePendentes == 0) {
+            c->removerPrimeiroDaFila();
+            c->ocupado = true;
+            return;
+        }
+
+        // Quando você NÃO precisa atender uma pessoa e NÃO tem documentos pendentes
+        if (c->tamanhoDaFila() == 0 && c->qtdePendentes <= 0) {
+            c->ocupado = false;
+            return;
+        }
+
+        // Quando você PRECISA atender uma pessoa e NÃO tem documentos pendentes
+        if (c->tamanhoDaFila() >= 1 && c->qtdePendentes <= 0) {
+            c->qtdePendentes += c->f.frente->qtde;
+            c->removerPrimeiroDaFila();
+            c->ocupado = true;
+            return;
+        }
+
+        // Quando você PRECISA atender uma pessoa e TEM documentos pendentes
+        if (c->tamanhoDaFila() >= 1 && c->qtdePendentes != 0) {
+            c->qtdePendentes--;
+            return;
+        }
+
+        if (c->qtdePendentes > 0) {
+            c->qtdePendentes--;
+            return;
+        }
+
+    }
+
+    void definirTempo(int tempo) {
+        tempoRestante = tempo;
+        tempoTotal = tempo;
+    }
+
+
+};
+
 
 int main() {
-    
-    criarEventos();
-    
-    fila fila_teste;
-    inicializar(&fila_teste);
-    
-    // Adiciona diversos nomes na fila
-    adicionar(&fila_teste, "Rafael");
-    adicionar(&fila_teste, "Bernardo");
-    adicionar(&fila_teste, "Enzo");
-    
-    exibirTodos(&fila_teste);
-    
-    removerPrimeiro(&fila_teste);
-    
-    exibirTodos(&fila_teste);
-    
-    cout << "\n" << endl;
+
+    fila fila_caixa1;
+    fila fila_caixa2;
+    Agencia agencia;
+    agencia.caixa1.inicializar();
+    agencia.caixa2.inicializar();
+    agencia.caixa1.f = fila_caixa1;
+    agencia.caixa2.f = fila_caixa2;
+    agencia.definirTempo(20);
+
+    agencia.caixa1.f.frente = NULL;
+    agencia.caixa1.f.re = NULL;
+    agencia.caixa1.f.tamanho = 0;
+    agencia.caixa2.f.frente = NULL;
+    agencia.caixa2.f.re = NULL;
+    agencia.caixa2.f.tamanho = 0;
+
+    agencia.caixa1.qtdePendentes = 0;
+    agencia.caixa2.adicionarNaFila(4);
+    agencia.caixa1.adicionarNaFila(6);
+    agencia.caixa2.adicionarNaFila(2);
+    //agencia.caixa2.adicionarNaFila(5);
+    //agencia.caixa1.adicionarNaFila(0);
+    //agencia.caixa1.adicionarNaFila(3);
+    //agencia.caixa2.adicionarNaFila(6);
+    //agencia.caixa2.adicionarNaFila(2);
+
+
+
+    for (int i=0; i<agencia.tempoTotal; i++) {
+        agencia.operarCaixa(&agencia.caixa1);
+        agencia.operarCaixa(&agencia.caixa2);
+        agencia.passarMinuto();
+        agencia.gerarLinha(&agencia.caixa1, &agencia.caixa2);
+    }
+
+
     
 }
 
