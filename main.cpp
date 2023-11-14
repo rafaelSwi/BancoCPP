@@ -302,3 +302,18 @@ int main(int argc, char *argv[]) {
         agencia.gerarLinha(&agencia.caixa1, &agencia.caixa2);
     }
 }
+
+// LEMBRETES:
+// to_string - Converte de int para string
+// stoi - Converte de string para int
+// stol - Converte de string para long
+// stof - Converte de string para float
+// stod - Converte de string para double
+// to_string - Converte de qualquer tipo numérico para string
+// stoi, stol, stoll, stoul, stoull, stof, stod, stold - Podem lançar std::invalid_argument se a string não for um número válido
+// stoi, stol, stoll - Podem lançar std::out_of_range se o valor convertido estiver fora do intervalo representável pelo tipo
+// stoi, stol, stoll, stoul, stoull - Aceitam uma segunda argumento opcional para indicar a posição do primeiro caractere não convertível na string
+// to_string - Funciona para int, long, long long, unsigned int, unsigned long, unsigned long long, float, double, long double
+// to_string - Pode ser usado para converter tipos personalizados se houver um operador de inserção sobrecarregado
+// char - Pode ser convertido para int subtraindo '0'
+// int - Pode ser convertido para char adicionando '0'
