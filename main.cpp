@@ -200,29 +200,79 @@ int* traduzirInput(string input, string tipo_referencia) {
         int min = 0;
         string tipo = "N";
         int qtde = 0;
-
-        if (numeroLinha >= 10) {
-            string minutoEmString = "";
+        
+        string minutoEmString = "";
+        string qtdeEmString = "";
+        
+        if (numeroLinha >= 1000000) {
+            minutoEmString += linha[0];
+            minutoEmString += linha[1];
+            minutoEmString += linha[2];
+            minutoEmString += linha[3];
+            minutoEmString += linha[4];
+            minutoEmString += linha[5];
+            minutoEmString += linha[6];
+            min = stoi(minutoEmString);
+            qtdeEmString += linha[10];
+            qtdeEmString += linha[11];
+            qtde = stoi(qtdeEmString);
+            tipo = linha[8];
+        } else if (numeroLinha >= 100000) {
+            minutoEmString += linha[0];
+            minutoEmString += linha[1];
+            minutoEmString += linha[2];
+            minutoEmString += linha[3];
+            minutoEmString += linha[4];
+            minutoEmString += linha[5];
+            min = stoi(minutoEmString);
+            qtdeEmString += linha[9];
+            qtdeEmString += linha[10];
+            qtde = stoi(qtdeEmString);
+            tipo = linha[7];
+        } else if (numeroLinha >= 10000) {
+            minutoEmString += linha[0];
+            minutoEmString += linha[1];
+            minutoEmString += linha[2];
+            minutoEmString += linha[3];
+            minutoEmString += linha[4];
+            min = stoi(minutoEmString);
+            qtdeEmString += linha[8];
+            qtdeEmString += linha[9];
+            qtde = stoi(qtdeEmString);
+            tipo = linha[6];
+        } else if (numeroLinha >= 1000) {
+            minutoEmString += linha[0];
+            minutoEmString += linha[1];
+            minutoEmString += linha[2];
+            minutoEmString += linha[3];
+            min = stoi(minutoEmString);
+            qtdeEmString += linha[7];
+            qtdeEmString += linha[8];
+            qtde = stoi(qtdeEmString);
+            tipo = linha[5];
+        } else if (numeroLinha >= 100) {
+            minutoEmString += linha[0];
+            minutoEmString += linha[1];
+            minutoEmString += linha[2];
+            min = stoi(minutoEmString);
+            qtdeEmString += linha[6];
+            qtdeEmString += linha[7];
+            qtde = stoi(qtdeEmString);
+            tipo = linha[4];
+        } else if (numeroLinha >= 10) {
             minutoEmString += linha[0];
             minutoEmString += linha[1];
             min = stoi(minutoEmString);
-
-            string qtdeEmString = "";
             qtdeEmString += linha[5];
             qtdeEmString += linha[6];
             qtde = stoi(qtdeEmString);
-
             tipo = linha[3];
         } else if (numeroLinha != 0) {
-            string minutoEmString = "";
             minutoEmString += linha[0];
             min = stoi(minutoEmString);
-
-            string qtdeEmString = "";
             qtdeEmString += linha[4];
             qtdeEmString += linha[5];
             qtde = stoi(qtdeEmString);
-
             tipo = linha[2];
         }
 
@@ -304,6 +354,7 @@ int main(int argc, char *argv[]) {
 }
 
 // LEMBRETES:
+// Para compilar: g++ -o nome_do_programa main.cpp
 // to_string - Converte de int para string
 // stoi - Converte de string para int
 // stol - Converte de string para long
